@@ -22,7 +22,7 @@ corpus <- tm_map(corpus, removeNumbers)
 # 4. Removing punctuation
 corpus <- tm_map(corpus, removePunctuation)
 # 5. Removing stop words
-#corpus <- tm_map(corpus, removeWords, stopwords("english"))
+corpus <- tm_map(corpus, removeWords, stopwords("english"))
 #corpus <- tm_map(corpus, stemDocument)
 
 DTM <- DocumentTermMatrix(corpus)
@@ -33,7 +33,7 @@ sums <- rownames_to_column(sums)
 colnames(sums) <- c("term", "count")
 sums <- arrange(sums, desc(count))
 #head <- sums[1:75,]
-wordcloud(words = head$term, freq = head$count, min.freq = 1000,
+wordcloud(words = sums$term, freq = sums$count, min.freq = 10,
           max.words=100, random.order=FALSE, rot.per=0.35, 
           colors=brewer.pal(8, "Dark2"))
 
