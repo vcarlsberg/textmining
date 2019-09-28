@@ -3,6 +3,7 @@ library(tm)
 library(SnowballC)
 library(wordcloud)
 library(tidyverse)
+library(SentimentAnalysis)
 
 load("/cloud/project/rdmTweets-201306.RData")
 #View(tweets)
@@ -72,3 +73,7 @@ wordcloud(words = head$term, freq = head$count, min.freq = 1000,
 #d <- data.frame(word=myNames, freq=v)
 #wordcloud(d$word, d$freq, min.freq=50)
 
+
+sentiment <- analyzeSentiment(DTM, language = "english")
+sentiment <- as.data.frame(sentiment)
+head(sent)
