@@ -1,33 +1,22 @@
-library(twitteR)
+#library(twitteR)
 library(tm)
 library(tidyverse)
 library(wordcloud)
 library(SentimentAnalysis)
 library(syuzhet)
 library(data.table)
+library(rcrossref)
 
-twitter_user="@FoxNews"
+#twitter_user="@FoxNews"
 
-setup_twitter_oauth(api_key, api_secret, access_token, access_token_secret)
-tweet_data = userTimeline(twitter_user,n=500)
+#setup_twitter_oauth(api_key, api_secret, access_token, access_token_secret)
+#tweet_data = userTimeline(twitter_user,n=500)
 
-df <- do.call("rbind", lapply(tweet_data, as.data.frame))
-dim(df)
+#df <- do.call("rbind", lapply(tweet_data, as.data.frame))
+#dim(df)
+abstract<-cr_abstract(doi = '10.1109/TASC.2010.2088091')
 
-abstract="This study explored the pattern of video 
-game usage and video game addiction among male 
-college students and examined how video game addiction 
-was related to expectations of college engagement, college grade point average (GPA), 
-and on-campus drug and alcohol violations. 
-Participants were 477 male, first year students at a liberal arts college. 
-In the week before the start of classes, participants were given two surveys: 
-one of expected college engagement, and the second of video game usage, 
-including a measure of video game addiction. 
-Results suggested that video game addiction is (a) negatively correlated with expected college 
-engagement, (b) negatively correlated with college GPA, even when controlling for high school 
-GPA, and (c) negatively correlated with drug and alcohol violations that occurred during the first 
-year in college. 
-Results are discussed in terms of implications for male students’ engagement and success in college, and in terms of the construct validity of video game addiction."
+
 
 corpus <- SimpleCorpus(VectorSource(abstract))
 # 1. Stripping any extra white space:
@@ -37,11 +26,10 @@ corpus <- tm_map(corpus, content_transformer(tolower))
 # 3. Removing numbers 
 corpus <- tm_map(corpus, removeNumbers)
 # 4. Removing punctuation
-corpus <- tm_map(corpus, removePunctuation)
+removeSymbols <- function(x) gsub("[^[:alpha:][:space:]]*","",x)
+corpus <- tm_map(corpus, content_transformer(removeSymbols))
 # 5. Removing stop words
-corpus <- tm_map(corpus, removeWords, c(stopwords("english"),"jakpost","dari","sejak","dengan","lagi",
-                                        "dan","juga","selalu","karena",
-                                        "ada","yang","kamu","ini","itu","saja","bisa"))
+corpus <- tm_map(corpus, removeWords, stopwords("english"))
 
 DTM <- DocumentTermMatrix(corpus)
 inspect(DTM)
@@ -51,7 +39,7 @@ sums <- rownames_to_column(sums)
 colnames(sums) <- c("term", "count")
 sums <- arrange(sums, desc(count))
 #head <- sums[1:75,]
-wordcloud(words = sums$term, freq = sums$count, min.freq = 5, 
+wordcloud(words = sums$term, freq = sums$count, min.freq = 3, 
           max.words=100, random.order=FALSE, rot.per=0.35, 
           colors=brewer.pal(8, "Dark2"))
 
@@ -64,7 +52,7 @@ sent <- as.data.frame(sent)
 head(sent)
 summary(sent$SentimentGI)
 
-sent2 <- get_nrc_sentiment(df$text)
+sent2 <- get_nrc_sentiment(abstract)
 # Let's look at the corpus as a whole again:
 sent3 <- as.data.frame(colSums(sent2))
 sent3 <- rownames_to_column(sent3) 
@@ -78,7 +66,7 @@ ggplot(sent3[1:8,1:2],
   theme_minimal() + 
   theme(legend.position="none", panel.grid.major = element_blank()) + 
   labs( x = "Emotion", y = "Total Count") + 
-  ggtitle("Sentiment of tweet") + 
+  ggtitle("Sentiment of abstract") + 
   theme(plot.title = element_text(hjust=0.5))
 
 ggplot(sent3[9:10,1:2], 
@@ -87,6 +75,6 @@ ggplot(sent3[9:10,1:2],
   theme_minimal() + 
   theme(legend.position="none", panel.grid.major = element_blank()) + 
   labs( x = "Positivity", y = "Total Count") + 
-  ggtitle("Sentiment of tweet") + 
+  ggtitle("Positivity of abstract") + 
   theme(plot.title = element_text(hjust=0.5))
 
