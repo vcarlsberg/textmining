@@ -6,6 +6,7 @@ library(SentimentAnalysis)
 library(syuzhet)
 library(data.table)
 library(rcrossref)
+library(textstem)
 
 #twitter_user="@FoxNews"
 
@@ -15,10 +16,12 @@ library(rcrossref)
 #df <- do.call("rbind", lapply(tweet_data, as.data.frame))
 #dim(df)
 abstract<-cr_abstract(doi = '10.1109/TASC.2010.2088091')
+abstract<-"\n                    A 1.3 GHz test cavity has been designed to test wafer samples of superconducting materials. This mushroom shaped cavity, operating in TE\n                    01\n                    mode, creates a unique distribution of surface fields. The surface magnetic field on the sample wafer is 3.75 times greater than elsewhere on the Niobium cavity surface. This field design is made possible through dielectrically loading the cavity by locating a hemisphere of ultra-pure sapphire just above the sample wafer. The sapphire pulls the fields away from the walls so the maximum field the Nb surface sees is 25% of the surface field on the sample. In this manner, it should be possible to drive the sample wafer well beyond the BCS limit for Niobium while still maintaining a respectable Q. The sapphire's purity must be tested for its loss tangent and dielectric constant to finalize the design of the mushroom test cavity. A sapphire loaded CEBAF cavity has been constructed and tested. The results on the dielectric constant and loss tangent will be presented.\n                  "
 
-
+abstract<-lemmatize_strings(abstract)
 
 corpus <- SimpleCorpus(VectorSource(abstract))
+
 # 1. Stripping any extra white space:
 corpus <- tm_map(corpus, stripWhitespace)
 # 2. Transforming everything to lowercase
