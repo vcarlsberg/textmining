@@ -3,16 +3,23 @@ library(tm)
 library(tidyverse)
 library(wordcloud)
 library(SentimentAnalysis)
-library(syuzhet)
 library(data.table)
+library(fpc)
+library(mclust)
+library(dplyr)
 
-twitter_user="@Lambe_Turah"
+api_key="oJmTP5bhCgutk4aQNOvZb4RtG"
+api_secret="z51jwqM7kirUKBId7GJ07SMaTxeNtZk4xlrfyUpILO2JKXJMas"
+access_token="48937719-ciXusxAAYXZCKvKD1e0P58GxIw7D9DiR7JdkZR2lk"
+access_token_secret="Rk5IlscyUxQM4DJ9j6jBeIE7mtfuPWNvxLLMV2muoZ9HX"
+twitter_user="@detikcom"
 
 setup_twitter_oauth(api_key, api_secret, access_token, access_token_secret)
-tweet_data = userTimeline(twitter_user,n=1000)
+tweet_data = userTimeline(twitter_user,n=3200)
 
 df<-twListToDF(tweet_data)
 dim(df)
+df<-filter(df, created >= "2019-10-19 00:00:00" & created <= "2019-10-23 23:59:59")
 
 corpus <- SimpleCorpus(VectorSource(df$text))
 # 1. Menghilangkan whitespace
@@ -49,7 +56,7 @@ neg=scan("negative.txt",character(),quote="")
 pos=scan("positive.txt",character(),quote="")
 
 d <- SentimentDictionaryBinary(neg,pos)
-#summary(d)
+summary(d)
 #print(d)
 
 #ruleSentiment(DTM, d)
@@ -79,3 +86,8 @@ ggplot(data=sent,aes(sentiment))+
        x = "Kategori Sentimen", y = "Jumlah Tweet") +
   theme(plot.title = element_text(hjust = 0.5))
 
+distance <- dist(DTM, method = "euclidean")
+fit <- hclust(distance, method="ward")
+plot(fit)
+groups <- cutree(fit, k=10)
+rect.hclust(fit, k=10, border="red")

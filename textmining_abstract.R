@@ -42,6 +42,7 @@ sums <- rownames_to_column(sums)
 colnames(sums) <- c("term", "count")
 sums <- arrange(sums, desc(count))
 #head <- sums[1:75,]
+set.seed(1234)
 wordcloud(words = sums$term, freq = sums$count, min.freq = 3, 
           max.words=100, random.order=FALSE, rot.per=0.35, 
           colors=brewer.pal(8, "Dark2"))
